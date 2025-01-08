@@ -17,7 +17,7 @@ static void ucc_tl_ucp_err_handler(void *arg, ucp_ep_h ep, ucs_status_t status)
 
 static inline ucc_status_t ucc_tl_ucp_connect_ep(ucc_tl_ucp_context_t *ctx,
                                                  int is_service, ucp_ep_h *ep,
-                                                 void *ucp_address)
+                                                 void *ucp_address, uint8_t collectives_prio_dscp)
 {
     ucp_worker_h worker =
         (is_service) ? ctx->service_worker.ucp_worker : ctx->worker.ucp_worker;
@@ -29,6 +29,9 @@ static inline ucc_status_t ucc_tl_ucp_connect_ep(ucc_tl_ucp_context_t *ctx,
     }
     ep_params.field_mask = UCP_EP_PARAM_FIELD_REMOTE_ADDRESS;
     ep_params.address    = (ucp_address_t *)ucp_address;
+
+    ep_params.field_mask = UCP_EP_PARAM_COLLECTIVES_PRIO_DSCP;
+    ep_params.collectives_prio_dscp = collectives_prio_dscp;
 
     if (!UCC_TL_CTX_HAS_OOB(ctx)) {
         ep_params.err_mode        = UCP_ERR_HANDLING_MODE_PEER;
@@ -48,7 +51,7 @@ static inline ucc_status_t ucc_tl_ucp_connect_ep(ucc_tl_ucp_context_t *ctx,
 }
 
 ucc_status_t ucc_tl_ucp_connect_team_ep(ucc_tl_ucp_team_t *team,
-                                        ucc_rank_t core_rank, ucp_ep_h *ep)
+                                        ucc_rank_t core_rank, ucp_ep_h *ep, uint8_t collectives_prio_dscp)
 {
     ucc_tl_ucp_context_t *ctx = UCC_TL_UCP_TEAM_CTX(team);
     int                   use_service_worker = USE_SERVICE_WORKER(team);
@@ -59,7 +62,7 @@ ucc_status_t ucc_tl_ucp_connect_team_ep(ucc_tl_ucp_team_t *team,
     addr = use_service_worker ? TL_UCP_EP_ADDR_WORKER_SERVICE(addr)
                               : TL_UCP_EP_ADDR_WORKER(addr);
 
-    return ucc_tl_ucp_connect_ep(ctx, use_service_worker, ep, addr);
+    return ucc_tl_ucp_connect_ep(ctx, use_service_worker, ep, addr, collectives_prio_dscp);
 }
 
 /* Finds next non-NULL ep in the storage and returns that handle

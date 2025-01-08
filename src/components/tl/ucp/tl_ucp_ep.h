@@ -39,7 +39,7 @@ typedef struct ucc_tl_ucp_context ucc_tl_ucp_context_t;
 typedef struct ucc_tl_ucp_team    ucc_tl_ucp_team_t;
 
 ucc_status_t ucc_tl_ucp_connect_team_ep(ucc_tl_ucp_team_t *team,
-                                        ucc_rank_t team_rank, ucp_ep_h *ep);
+                                        ucc_rank_t team_rank, ucp_ep_h *ep, uint8_t collectives_prio_dscp);
 
 void ucc_tl_ucp_close_eps(ucc_tl_ucp_worker_t * worker,
                           ucc_tl_ucp_context_t *ctx);
@@ -53,7 +53,7 @@ ucc_tl_ucp_get_team_ep_header(ucc_tl_ucp_team_t *team, ucc_rank_t core_rank)
 }
 
 static inline ucc_status_t ucc_tl_ucp_get_ep(ucc_tl_ucp_team_t *team,
-                                             ucc_rank_t rank, ucp_ep_h *ep)
+                                             ucc_rank_t rank, ucp_ep_h *ep, uint8_t collectives_prio_dscp)
 {
     ucc_context_addr_header_t *h        = NULL;
     ucc_rank_t                 ctx_rank = 0;
@@ -74,7 +74,7 @@ static inline ucc_status_t ucc_tl_ucp_get_ep(ucc_tl_ucp_team_t *team,
     }
     if (NULL == (*ep)) {
         /* Not connected yet */
-        status = ucc_tl_ucp_connect_team_ep(team, core_rank, ep);
+        status = ucc_tl_ucp_connect_team_ep(team, core_rank, ep, collectives_prio_dscp);
         if (ucc_unlikely(UCC_OK != status)) {
             tl_error(UCC_TL_TEAM_LIB(team), "failed to connect team ep");
             *ep = NULL;
