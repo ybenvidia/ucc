@@ -304,7 +304,7 @@ static inline ucc_status_t ucc_tl_ucp_ep_flush(ucc_rank_t dest_group_rank,
     ucs_status_ptr_t    req;
     ucp_ep_h            ep;
 
-    status = ucc_tl_ucp_get_ep(team, dest_group_rank, &ep);
+    status = ucc_tl_ucp_get_ep(team, dest_group_rank, &ep, 0);
     if (ucc_unlikely(UCC_OK != status)) {
         return status;
     }
@@ -333,7 +333,7 @@ static inline ucc_status_t ucc_tl_ucp_put_nb(void *buffer, void *target,
     ucc_status_t        status;
     ucp_ep_h            ep;
 
-    status = ucc_tl_ucp_get_ep(team, dest_group_rank, &ep);
+    status = ucc_tl_ucp_get_ep(team, dest_group_rank, &ep, 0);
     if (ucc_unlikely(UCC_OK != status)) {
         return status;
     }
@@ -376,7 +376,7 @@ static inline ucc_status_t ucc_tl_ucp_get_nb(void *buffer, void *target,
     ucc_status_t        status;
     ucp_ep_h            ep;
 
-    status = ucc_tl_ucp_get_ep(team, dest_group_rank, &ep);
+    status = ucc_tl_ucp_get_ep(team, dest_group_rank, &ep, 0);
     if (ucc_unlikely(UCC_OK != status)) {
         return status;
     }
@@ -419,7 +419,7 @@ static inline ucc_status_t ucc_tl_ucp_atomic_inc(void *     target,
     ucc_status_t        status;
     ucp_ep_h            ep;
 
-    status = ucc_tl_ucp_get_ep(team, dest_group_rank, &ep);
+    status = ucc_tl_ucp_get_ep(team, dest_group_rank, &ep, 0);
     if (ucc_unlikely(UCC_OK != status)) {
         return status;
     }

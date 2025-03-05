@@ -395,7 +395,7 @@ void ucc_tl_ucp_allreduce_sliding_window_rdma_progress(ucc_coll_task_t *coll_tas
             getbuf->state   = RECVING;
             getbuf->count   = count;
             getbuf->bytes   = data_size;
-            ucc_tl_ucp_get_ep(tl_team, src_rank, &ep);
+            ucc_tl_ucp_get_ep(tl_team, src_rank, &ep, 0);
             getbuf->ucp_req = ucp_get_nbx(
                 ep, dst_addr,
                 data_size, (uint64_t)src_addr,
@@ -489,7 +489,7 @@ void ucc_tl_ucp_allreduce_sliding_window_rdma_progress(ucc_coll_task_t *coll_tas
                 }
 
                 ucp_worker_fence(tl_ctx->worker.ucp_worker);
-                ucc_tl_ucp_get_ep(tl_team, dst_rank, &ep);
+                ucc_tl_ucp_get_ep(tl_team, dst_rank, &ep, 0);
                 task->allreduce_sliding_window.put_requests[put_idx] = 
                     ucp_put_nbx(
                         ep, src_addr,

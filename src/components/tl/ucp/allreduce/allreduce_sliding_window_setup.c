@@ -199,7 +199,7 @@ ucc_status_t ucc_tl_ucp_allreduce_sliding_window_allgather_info_finalize(
     ucc_assert(team_size > 0);
 
     for (i = 0; i < team_size; i++) {
-        status = ucc_tl_ucp_get_ep(tl_team, i, &ep);
+        status = ucc_tl_ucp_get_ep(tl_team, i, &ep, 0);
         if (ucc_unlikely(UCC_OK != status)) {
             return status;
         }
