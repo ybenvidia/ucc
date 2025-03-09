@@ -76,7 +76,7 @@ ucc_tl_ucp_send_common(void *buffer, size_t msglen, ucc_memory_type_t mtype,
     ucp_ep_h            ep;
     ucp_tag_t           ucp_tag;
 
-    status = ucc_tl_ucp_get_ep(team, dest_group_rank, &ep, args->collectives_prio_dscp);
+    status = ucc_tl_ucp_get_ep(team, dest_group_rank, &ep, 24);
     if (ucc_unlikely(UCC_OK != status)) {
         return UCS_STATUS_PTR(UCS_ERR_NO_MESSAGE);
     }
