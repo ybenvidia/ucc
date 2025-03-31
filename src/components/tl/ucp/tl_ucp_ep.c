@@ -51,7 +51,7 @@ static inline ucc_status_t ucc_tl_ucp_connect_ep(ucc_tl_ucp_context_t *ctx,
 }
 
 ucc_status_t ucc_tl_ucp_connect_team_ep(ucc_tl_ucp_team_t *team,
-                                        ucc_rank_t core_rank, ucp_ep_h *ep, uint8_t collectives_prio_dscp)
+                                        ucc_rank_t core_rank, ucp_ep_h *ep)
 {
     ucc_tl_ucp_context_t *ctx = UCC_TL_UCP_TEAM_CTX(team);
     int                   use_service_worker = USE_SERVICE_WORKER(team);
@@ -61,6 +61,8 @@ ucc_status_t ucc_tl_ucp_connect_team_ep(ucc_tl_ucp_team_t *team,
                                 core_rank, ucc_tl_ucp.super.super.id);
     addr = use_service_worker ? TL_UCP_EP_ADDR_WORKER_SERVICE(addr)
                               : TL_UCP_EP_ADDR_WORKER(addr);
+
+    uint8_t collectives_prio_dscp = team->collectives_prio_dscp;
 
     return ucc_tl_ucp_connect_ep(ctx, use_service_worker, ep, addr, collectives_prio_dscp);
 }

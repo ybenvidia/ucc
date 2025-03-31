@@ -128,7 +128,7 @@ ucc_status_t ucc_tl_ucp_ucp_copy_post(void *dst, ucc_memory_type_t dst_mtype,
     UCC_TL_UCP_CHECK_REQ_STATUS();
     (*copy_task)= ucp_status;
 
-    status = ucc_tl_ucp_get_ep(team, trank, &ep, 0);
+    status = ucc_tl_ucp_get_ep(team, trank, &ep);
     if (ucc_unlikely(UCC_OK != status)) {
         return status;
     }

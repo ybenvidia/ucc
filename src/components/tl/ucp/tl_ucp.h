@@ -175,6 +175,7 @@ typedef struct ucc_tl_ucp_team {
     ucc_ep_map_t               ctx_map;
     ucc_rank_t                 opt_radix; /* generic opt radix */
     ucc_rank_t                 opt_radix_host; /* host specific opt radix */
+    uint8_t                    collectives_prio_dscp;
 } ucc_tl_ucp_team_t;
 UCC_CLASS_DECLARE(ucc_tl_ucp_team_t, ucc_base_context_t *,
                   const ucc_base_team_params_t *);

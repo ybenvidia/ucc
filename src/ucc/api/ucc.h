@@ -1842,7 +1842,6 @@ enum ucc_coll_args_field {
  *
  */
 typedef struct ucc_coll_args {
-    uint8_t                        collectives_prio_dscp; /*!< DSCP to prioritize collective */
     uint64_t                        mask;
     ucc_coll_type_t                 coll_type; /*!< Type of collective operation */
     union {
