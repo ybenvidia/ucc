@@ -61,6 +61,13 @@ UCC_CLASS_INIT_FUNC(ucc_tl_ucp_team_t, ucc_base_context_t *tl_context,
     self->opt_radix       = UCC_UUNITS_AUTO_RADIX;
     self->opt_radix_host  = UCC_UUNITS_AUTO_RADIX;
 
+    if (params->params.mask & UCC_TEAM_PARAM_FIELD_EP_DSCP) {
+        self->dscp = (uint8_t)params->params.ep_dscp;
+        tl_debug(tl_context->lib, "DSCP param received: %u", self->dscp);
+    } else {
+        self->dscp = 0;
+    }
+
     status = ucc_config_clone_table(&UCC_TL_UCP_TEAM_LIB(self)->cfg, &self->cfg,
                                     ucc_tl_ucp_lib_config_table);
     if (UCC_OK != status) {

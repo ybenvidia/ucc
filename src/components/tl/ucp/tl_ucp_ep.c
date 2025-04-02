@@ -30,8 +30,8 @@ static inline ucc_status_t ucc_tl_ucp_connect_ep(ucc_tl_ucp_context_t *ctx,
     ep_params.field_mask = UCP_EP_PARAM_FIELD_REMOTE_ADDRESS;
     ep_params.address    = (ucp_address_t *)ucp_address;
 
-    ep_params.field_mask = UCP_EP_PARAM_COLLECTIVES_PRIO_DSCP;
-    ep_params.collectives_prio_dscp = collectives_prio_dscp;
+    ep_params.field_mask |= UCP_EP_PARAM_COLLECTIVES_PRIO_DSCP;
+    ep_params.dscp = dscp;
 
     if (!UCC_TL_CTX_HAS_OOB(ctx)) {
         ep_params.err_mode        = UCP_ERR_HANDLING_MODE_PEER;

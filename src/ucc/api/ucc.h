@@ -1207,7 +1207,8 @@ enum ucc_team_params_field {
     UCC_TEAM_PARAM_FIELD_MEM_PARAMS             = UCC_BIT(9),
     UCC_TEAM_PARAM_FIELD_EP_MAP                 = UCC_BIT(10),
     UCC_TEAM_PARAM_FIELD_ID                     = UCC_BIT(11),
-    UCC_TEAM_PARAM_FIELD_FLAGS                  = UCC_BIT(12)
+    UCC_TEAM_PARAM_FIELD_FLAGS                  = UCC_BIT(12),
+    UCC_TEAM_PARAM_FIELD_EP_DSCP                = UCC_BIT(13)
 };
 
 /**
@@ -1481,6 +1482,8 @@ typedef struct ucc_team_params {
       * programming model, this can be inherited from the MPI communicator id.
       */
     uint64_t                id;
+
+    uint8_t                 ep_dscp;
 } ucc_team_params_t;
 
 /**
