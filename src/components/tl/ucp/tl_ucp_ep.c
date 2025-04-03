@@ -17,7 +17,7 @@ static void ucc_tl_ucp_err_handler(void *arg, ucp_ep_h ep, ucs_status_t status)
 
 static inline ucc_status_t ucc_tl_ucp_connect_ep(ucc_tl_ucp_context_t *ctx,
                                                  int is_service, ucp_ep_h *ep,
-                                                 void *ucp_address, uint8_t collectives_prio_dscp)
+                                                 void *ucp_address, uint8_t dscp)
 {
     ucp_worker_h worker =
         (is_service) ? ctx->service_worker.ucp_worker : ctx->worker.ucp_worker;
