@@ -62,9 +62,9 @@ ucc_status_t ucc_tl_ucp_connect_team_ep(ucc_tl_ucp_team_t *team,
     addr = use_service_worker ? TL_UCP_EP_ADDR_WORKER_SERVICE(addr)
                               : TL_UCP_EP_ADDR_WORKER(addr);
 
-    uint8_t collectives_prio_dscp = team->collectives_prio_dscp;
+    uint8_t dscp = team->dscp;
 
-    return ucc_tl_ucp_connect_ep(ctx, use_service_worker, ep, addr, collectives_prio_dscp);
+    return ucc_tl_ucp_connect_ep(ctx, use_service_worker, ep, addr, dscp);
 }
 
 /* Finds next non-NULL ep in the storage and returns that handle
