@@ -33,6 +33,8 @@ static inline ucc_status_t ucc_tl_ucp_connect_ep(ucc_tl_ucp_context_t *ctx,
     ep_params.field_mask |= UCP_EP_PARAM_COLLECTIVES_PRIO_DSCP;
     ep_params.dscp = dscp;
 
+    printf("[ucc_tl_ucp_connect_ep] Setting dscp = %u\n", dscp);
+
     if (!UCC_TL_CTX_HAS_OOB(ctx)) {
         ep_params.err_mode        = UCP_ERR_HANDLING_MODE_PEER;
         ep_params.err_handler.cb  = ucc_tl_ucp_err_handler;
@@ -40,6 +42,8 @@ static inline ucc_status_t ucc_tl_ucp_connect_ep(ucc_tl_ucp_context_t *ctx,
         ep_params.field_mask     |= UCP_EP_PARAM_FIELD_ERR_HANDLING_MODE |
                                     UCP_EP_PARAM_FIELD_ERR_HANDLER;
     }
+
+    printf("[ucc_tl_ucp_connect_ep] Creating UCP endpoint with dscp = %u\n", ep_params.dscp);
     status = ucp_ep_create(worker, &ep_params, ep);
 
     if (ucc_unlikely(UCS_OK != status)) {
@@ -63,6 +67,9 @@ ucc_status_t ucc_tl_ucp_connect_team_ep(ucc_tl_ucp_team_t *team,
                               : TL_UCP_EP_ADDR_WORKER(addr);
 
     uint8_t dscp = team->dscp;
+
+    printf("[ucc_tl_ucp_connect_team_ep] The DSCP in the team is = %u\n", team->dscp);
+    printf("[ucc_tl_ucp_connect_team_ep] The DSCP is now = %u\n", dscp);
 
     return ucc_tl_ucp_connect_ep(ctx, use_service_worker, ep, addr, dscp);
 }

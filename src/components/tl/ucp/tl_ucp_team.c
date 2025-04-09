@@ -63,10 +63,13 @@ UCC_CLASS_INIT_FUNC(ucc_tl_ucp_team_t, ucc_base_context_t *tl_context,
 
     if (params->params.mask & UCC_TEAM_PARAM_FIELD_EP_DSCP) {
         self->dscp = (uint8_t)params->params.ep_dscp;
-        tl_debug(tl_context->lib, "DSCP param received: %u", self->dscp);
+        printf("[ucc_tl_ucp_team] Received DSCP in team: %u\n", self->dscp);
     } else {
         self->dscp = 0;
+        printf("[ucc_tl_ucp_team_create] No ep_dscp passed, defaulting to 0\n");
     }
+
+    printf("[ucc_tl_ucp_team-2] Final team DSCP: %u\n", self->dscp);
 
     status = ucc_config_clone_table(&UCC_TL_UCP_TEAM_LIB(self)->cfg, &self->cfg,
                                     ucc_tl_ucp_lib_config_table);
