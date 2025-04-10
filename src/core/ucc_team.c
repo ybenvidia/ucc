@@ -88,6 +88,9 @@ static ucc_status_t ucc_team_create_post_single(ucc_context_t *context,
     team->state                   = (team->size > 1) ? UCC_TEAM_ADDR_EXCHANGE
                                                      : UCC_TEAM_CL_CREATE;
     team->last_team_create_posted = -1;
+
+    printf("POST_SINGLE: final mask = 0x%lx, ep_dscp = %u\n",
+        team->bp.params.mask, team->bp.params.ep_dscp);
     return UCC_OK;
 }
 
@@ -199,6 +202,10 @@ ucc_status_t ucc_team_create_post(ucc_context_h *contexts, uint32_t num_contexts
 
     memcpy(team->contexts, contexts, sizeof(ucc_context_t *) * num_contexts);
     ucc_copy_team_params(&team->bp.params, params);
+
+    printf("DEBUG: after copy, bp.params.mask = 0x%x, dscp = %u\n",
+        team->bp.params.mask, team->bp.params.ep_dscp);
+        
     /* check if user provides team id and if it is not too large */
     if ((params->mask & UCC_TEAM_PARAM_FIELD_ID) &&
         (params->id <= UCC_TEAM_ID_MAX)) {
