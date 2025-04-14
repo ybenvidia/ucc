@@ -203,7 +203,7 @@ ucc_status_t ucc_team_create_post(ucc_context_h *contexts, uint32_t num_contexts
     memcpy(team->contexts, contexts, sizeof(ucc_context_t *) * num_contexts);
     ucc_copy_team_params(&team->bp.params, params);
 
-    printf("DEBUG: after copy, bp.params.mask = 0x%x, traffic_class = %u\n",
+    printf("DEBUG: after copy, bp.params.mask = 0x%lx, traffic_class = %u\n",
         team->bp.params.mask, team->bp.params.ep_traffic_class);
         
     /* check if user provides team id and if it is not too large */
