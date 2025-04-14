@@ -33,7 +33,7 @@ void ucc_copy_team_params(ucc_team_params_t *dst, const ucc_team_params_t *src)
     UCC_COPY_PARAM_BY_FIELD(dst, src, UCC_TEAM_PARAM_FIELD_MEM_PARAMS,
                             mem_params);
     UCC_COPY_PARAM_BY_FIELD(dst, src, UCC_TEAM_PARAM_FIELD_EP_MAP, ep_map);
-    UCC_COPY_PARAM_BY_FIELD(dst, src, UCC_TEAM_PARAM_FIELD_EP_DSCP, ep_dscp);
+    UCC_COPY_PARAM_BY_FIELD(dst, src, UCC_TEAM_PARAM_FIELD_EP_TRAFFIC_CLASS, ep_traffic_class);
 }
 
 ucc_status_t ucc_team_get_attr(ucc_team_h team, ucc_team_attr_t *team_attr)
@@ -89,8 +89,8 @@ static ucc_status_t ucc_team_create_post_single(ucc_context_t *context,
                                                      : UCC_TEAM_CL_CREATE;
     team->last_team_create_posted = -1;
 
-    printf("POST_SINGLE: final mask = 0x%lx, ep_dscp = %u\n",
-        team->bp.params.mask, team->bp.params.ep_dscp);
+    printf("POST_SINGLE: final mask = 0x%lx, ep_traffic_class = %u\n",
+        team->bp.params.mask, team->bp.params.ep_traffic_class);
     return UCC_OK;
 }
 
@@ -203,8 +203,8 @@ ucc_status_t ucc_team_create_post(ucc_context_h *contexts, uint32_t num_contexts
     memcpy(team->contexts, contexts, sizeof(ucc_context_t *) * num_contexts);
     ucc_copy_team_params(&team->bp.params, params);
 
-    printf("DEBUG: after copy, bp.params.mask = 0x%x, dscp = %u\n",
-        team->bp.params.mask, team->bp.params.ep_dscp);
+    printf("DEBUG: after copy, bp.params.mask = 0x%x, traffic_class = %u\n",
+        team->bp.params.mask, team->bp.params.ep_traffic_class);
         
     /* check if user provides team id and if it is not too large */
     if ((params->mask & UCC_TEAM_PARAM_FIELD_ID) &&

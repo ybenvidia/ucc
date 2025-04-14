@@ -1208,7 +1208,7 @@ enum ucc_team_params_field {
     UCC_TEAM_PARAM_FIELD_EP_MAP                 = UCC_BIT(10),
     UCC_TEAM_PARAM_FIELD_ID                     = UCC_BIT(11),
     UCC_TEAM_PARAM_FIELD_FLAGS                  = UCC_BIT(12),
-    UCC_TEAM_PARAM_FIELD_EP_DSCP                = UCC_BIT(13)
+    UCC_TEAM_PARAM_FIELD_EP_TRAFFIC_CLASS       = UCC_BIT(13)
 };
 
 /**
@@ -1483,7 +1483,7 @@ typedef struct ucc_team_params {
       */
     uint64_t                id;
 
-    uint8_t                 ep_dscp;
+    uint8_t                 ep_traffic_class;
 } ucc_team_params_t;
 
 /**

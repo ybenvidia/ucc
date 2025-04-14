@@ -61,15 +61,15 @@ UCC_CLASS_INIT_FUNC(ucc_tl_ucp_team_t, ucc_base_context_t *tl_context,
     self->opt_radix       = UCC_UUNITS_AUTO_RADIX;
     self->opt_radix_host  = UCC_UUNITS_AUTO_RADIX;
 
-    if (params->params.mask & UCC_TEAM_PARAM_FIELD_EP_DSCP) {
-        self->dscp = (uint8_t)params->params.ep_dscp;
-        printf("[ucc_tl_ucp_team] Received DSCP in team: %u\n", self->dscp);
+    if (params->params.mask & UCC_TEAM_PARAM_FIELD_EP_TRAFFIC_CLASS) {
+        self->traffic_class = (uint8_t)params->params.ep_traffic_class;
+        printf("[ucc_tl_ucp_team] Received traffic_class in team: %u\n", self->traffic_class);
     } else {
-        self->dscp = -1;
-        printf("[ucc_tl_ucp_team_create] No ep_dscp passed, defaulting to -1\n");
+        self->traffic_class = -1;
+        printf("[ucc_tl_ucp_team_create] No ep_traffic_class passed, defaulting to -1\n");
     }
 
-    printf("[ucc_tl_ucp_team-2] Final team DSCP: %u\n", self->dscp);
+    printf("[ucc_tl_ucp_team-2] Final team traffic_class: %u\n", self->traffic_class);
 
     status = ucc_config_clone_table(&UCC_TL_UCP_TEAM_LIB(self)->cfg, &self->cfg,
                                     ucc_tl_ucp_lib_config_table);

@@ -17,7 +17,7 @@ static void ucc_tl_ucp_err_handler(void *arg, ucp_ep_h ep, ucs_status_t status)
 
 static inline ucc_status_t ucc_tl_ucp_connect_ep(ucc_tl_ucp_context_t *ctx,
                                                  int is_service, ucp_ep_h *ep,
-                                                 void *ucp_address, uint8_t dscp)
+                                                 void *ucp_address, uint8_t traffic_class)
 {
     ucp_worker_h worker =
         (is_service) ? ctx->service_worker.ucp_worker : ctx->worker.ucp_worker;
@@ -30,10 +30,10 @@ static inline ucc_status_t ucc_tl_ucp_connect_ep(ucc_tl_ucp_context_t *ctx,
     ep_params.field_mask = UCP_EP_PARAM_FIELD_REMOTE_ADDRESS;
     ep_params.address    = (ucp_address_t *)ucp_address;
 
-    ep_params.field_mask |= UCP_EP_PARAM_COLLECTIVES_PRIO_DSCP;
-    ep_params.dscp = dscp;
+    ep_params.field_mask |= UCP_EP_PARAM_COLLECTIVES_PRIO_TRAFFIC_CLASS;
+    ep_params.traffic_class = traffic_class;
 
-    printf("[ucc_tl_ucp_connect_ep] Setting dscp = %u\n", dscp);
+    printf("[ucc_tl_ucp_connect_ep] Setting traffic_class = %u\n", traffic_class);
 
     if (!UCC_TL_CTX_HAS_OOB(ctx)) {
         ep_params.err_mode        = UCP_ERR_HANDLING_MODE_PEER;
@@ -43,7 +43,7 @@ static inline ucc_status_t ucc_tl_ucp_connect_ep(ucc_tl_ucp_context_t *ctx,
                                     UCP_EP_PARAM_FIELD_ERR_HANDLER;
     }
 
-    printf("[ucc_tl_ucp_connect_ep] Creating UCP endpoint with dscp = %u\n", ep_params.dscp);
+    printf("[ucc_tl_ucp_connect_ep] Creating UCP endpoint with traffic_class = %u\n", ep_params.traffic_class);
     status = ucp_ep_create(worker, &ep_params, ep);
 
     if (ucc_unlikely(UCS_OK != status)) {
@@ -66,12 +66,12 @@ ucc_status_t ucc_tl_ucp_connect_team_ep(ucc_tl_ucp_team_t *team,
     addr = use_service_worker ? TL_UCP_EP_ADDR_WORKER_SERVICE(addr)
                               : TL_UCP_EP_ADDR_WORKER(addr);
 
-    uint8_t dscp = team->dscp;
+    uint8_t traffic_class = team->traffic_class;
 
-    printf("[ucc_tl_ucp_connect_team_ep] The DSCP in the team is = %u\n", team->dscp);
-    printf("[ucc_tl_ucp_connect_team_ep] The DSCP is now = %u\n", dscp);
+    printf("[ucc_tl_ucp_connect_team_ep] The traffic_class in the team is = %u\n", team->traffic_class);
+    printf("[ucc_tl_ucp_connect_team_ep] The traffic_class is now = %u\n", traffic_class);
 
-    return ucc_tl_ucp_connect_ep(ctx, use_service_worker, ep, addr, dscp);
+    return ucc_tl_ucp_connect_ep(ctx, use_service_worker, ep, addr, traffic_class);
 }
 
 /* Finds next non-NULL ep in the storage and returns that handle
