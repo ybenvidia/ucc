@@ -50,9 +50,13 @@ UCC_CLASS_INIT_FUNC(ucc_tl_ucp_team_t, ucc_base_context_t *tl_context,
     ucc_rank_t     tsize, max_ppn;
     ucc_status_t   status;
 
+    printf("[UCC_CLASS_INIT_FUNC] Base params check - mask: 0x%lx, traffic_class: %u\n",
+       params->params.mask, params->params.ep_traffic_class);
+
     UCC_CLASS_CALL_SUPER_INIT(ucc_tl_team_t, &ctx->super, params);
     /* TODO: init based on ctx settings and on params: need to check
              if all the necessary ranks mappings are provided */
+    printf("[UCC_CLASS_INIT_FUNC] Traffic class before assignment: %u\n", self->traffic_class);
     self->preconnect_task = NULL;
     self->seq_num         = 0;
     self->status          = UCC_INPROGRESS;
@@ -60,16 +64,10 @@ UCC_CLASS_INIT_FUNC(ucc_tl_ucp_team_t, ucc_base_context_t *tl_context,
     self->topo            = NULL;
     self->opt_radix       = UCC_UUNITS_AUTO_RADIX;
     self->opt_radix_host  = UCC_UUNITS_AUTO_RADIX;
+    self->traffic_class   = params->params.ep_traffic_class;
 
-    if (params->params.mask & UCC_TEAM_PARAM_FIELD_EP_TRAFFIC_CLASS) {
-        self->traffic_class = (uint8_t)params->params.ep_traffic_class;
-        printf("[ucc_tl_ucp_team] Received traffic_class in team: %u\n", self->traffic_class);
-    } else {
-        self->traffic_class = -1;
-        printf("[ucc_tl_ucp_team_create] No ep_traffic_class passed, defaulting to -1\n");
-    }
-
-    printf("[ucc_tl_ucp_team-2] Final team traffic_class: %u\n", self->traffic_class);
+    printf("[UCC_CLASS_INIT_FUNC] Traffic class after assignment: %u\n", self->traffic_class);
+    printf("[UCC_CLASS_INIT_FUNC] team address: %p, traffic_class: %u\n", self, self->traffic_class);
 
     status = ucc_config_clone_table(&UCC_TL_UCP_TEAM_LIB(self)->cfg, &self->cfg,
                                     ucc_tl_ucp_lib_config_table);

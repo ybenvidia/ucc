@@ -69,6 +69,7 @@ static doca_error_t worker_ucc_ep_lookup(struct urom_worker_ucc *ucc_worker,
     ep_params.err_mode = UCP_ERR_HANDLING_MODE_PEER;
     ep_params.address = addr;
 
+    printf("[worker_ucc_p2p - ucp_ep_create]");
     ucs_status = ucp_ep_create(ucc_worker->ucp_data.ucp_worker,
                                &ep_params, &new_ep);
     if (ucs_status != UCS_OK) {
