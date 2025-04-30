@@ -136,6 +136,11 @@ static inline ucc_rank_t ucc_topo_max_ppn(ucc_topo_t *topo)
     return topo->max_ppn;
 }
 
+static inline int ucc_topo_is_single_ppn(ucc_topo_t *topo)
+{
+    return ucc_topo_max_ppn(topo) == 1;
+}
+
 /* Returns true if PPN is the same across all the nodes */
 static inline int ucc_topo_isoppn(ucc_topo_t *topo)
 {
@@ -253,9 +258,9 @@ static inline ucc_rank_t ucc_topo_nnodes(ucc_topo_t *topo)
     return sbgp->group_size;
 }
 
-/* Returns an array mapping each rank to its node leader.
-   The array is cached in topo->node_leaders. */
-ucc_status_t ucc_topo_get_node_leaders(ucc_topo_t *topo,
-                                       ucc_rank_t **node_leaders_out);
+/* Returns node leaders array - array that maps each rank to the TEAM RANK that 
+   is the leader of that rank's node. Also returns per-node leaders array - array
+   mapping node_id to the TEAM RANK of that node's leader */
+ucc_status_t ucc_topo_get_node_leaders(ucc_topo_t *topo, ucc_rank_t **node_leaders_out);
 
 #endif

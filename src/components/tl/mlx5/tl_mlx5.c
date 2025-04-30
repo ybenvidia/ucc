@@ -124,16 +124,21 @@ static ucc_config_field_t ucc_tl_mlx5_lib_config_table[] = {
      ucc_offsetof(ucc_tl_mlx5_lib_config_t, mcast_conf.cuda_mem_enabled),
      UCC_CONFIG_TYPE_BOOL},
 
-    {"MCAST_ONE_SIDED_RELIABILITY_ENABLE", "1",
-     "Enable one sided reliability for mcast",
-     ucc_offsetof(ucc_tl_mlx5_lib_config_t,
-                  mcast_conf.one_sided_reliability_enable),
+    {"MCAST_ONE_SIDED_RELIABILITY_ENABLE", "0", "Enable one sided reliability for mcast",
+     ucc_offsetof(ucc_tl_mlx5_lib_config_t, mcast_conf.one_sided_reliability_enable),
      UCC_CONFIG_TYPE_BOOL},
 
-    {"MCAST_ZERO_COPY_ALLGATHER_ENABLE", "1",
-     "Enable truly zero copy allgather design for mcast",
-     ucc_offsetof(ucc_tl_mlx5_lib_config_t,
-                  mcast_conf.truly_zero_copy_allgather_enabled),
+    {"MCAST_ONE_SIDED_RELIABILITY_THRESHOLD", "65536",
+     "Message threshold to toggle async to sync reliability protocol in mcast Allgather",
+     ucc_offsetof(ucc_tl_mlx5_lib_config_t, mcast_conf.reliability_scheme_msg_threshold),
+     UCC_CONFIG_TYPE_INT},
+
+    {"MCAST_ZERO_COPY_ALLGATHER_ENABLE", "0", "Enable truly zero copy allgather design for mcast",
+     ucc_offsetof(ucc_tl_mlx5_lib_config_t, mcast_conf.truly_zero_copy_allgather_enabled),
+     UCC_CONFIG_TYPE_BOOL},
+
+    {"MCAST_ZERO_COPY_BCAST_ENABLE", "0", "Enable truly zero copy bcast design for mcast",
+     ucc_offsetof(ucc_tl_mlx5_lib_config_t, mcast_conf.truly_zero_copy_bcast_enabled),
      UCC_CONFIG_TYPE_BOOL},
 
     {"MCAST_ZERO_COPY_PREPOST_BUCKET_SIZE", "16",
@@ -146,6 +151,11 @@ static ucc_config_field_t ucc_tl_mlx5_lib_config_table[] = {
     {"MCAST_GROUP_COUNT", "1", "Number of multicast groups that can be used to increase parallelism",
      ucc_offsetof(ucc_tl_mlx5_lib_config_t, mcast_conf.mcast_group_count),
      UCC_CONFIG_TYPE_INT},
+
+    {"MCAST_ZERO_COPY_COLL_MIN_MSG", "65536",
+     "Min msg size to be used for zero copy collectives",
+     ucc_offsetof(ucc_tl_mlx5_lib_config_t, mcast_conf.truly_zero_copy_coll_min_msg),
+     UCC_CONFIG_TYPE_UINT},
 
     {"ALLTOALL_SEND_BATCH_SIZE", "2",
      "Number of blocks that are transposed "
@@ -175,10 +185,18 @@ static ucc_config_field_t ucc_tl_mlx5_context_config_table[] = {
      ucc_offsetof(ucc_tl_mlx5_context_config_t, devices),
      UCC_CONFIG_TYPE_STRING_ARRAY},
 
-    {"MCAST_TIMEOUT", "10000",
+    {"MCAST_TIMEOUT", "1000000",
      "Timeout [usec] for the reliability NACK in Mcast",
      ucc_offsetof(ucc_tl_mlx5_context_config_t, mcast_ctx_conf.timeout),
      UCC_CONFIG_TYPE_INT},
+
+    {"MCAST_BCAST_ENABLE", "1", "Enable Mcast-based Bcast",
+     ucc_offsetof(ucc_tl_mlx5_context_config_t, mcast_ctx_conf.mcast_bcast_enabled),
+     UCC_CONFIG_TYPE_BOOL},
+
+    {"MCAST_ALLGATHER_ENABLE", "0", "Enable Mcast-based Allgather",
+     ucc_offsetof(ucc_tl_mlx5_context_config_t, mcast_ctx_conf.mcast_allgather_enabled),
+     UCC_CONFIG_TYPE_BOOL},
 
     {"MCAST_ENABLE", "0", "Enable Mcast",
      ucc_offsetof(ucc_tl_mlx5_context_config_t, mcast_ctx_conf.mcast_enabled),

@@ -8,6 +8,7 @@
 #include <glob.h>
 #include <net/if.h>
 #include <ifaddrs.h>
+#include "tl_mlx5_mcast_one_sided_reliability.h"
 
 #define PREF        "/sys/class/net/"
 #define SUFF        "/device/resource"
@@ -280,6 +281,7 @@ ucc_status_t ucc_tl_mlx5_mcast_init_qps(ucc_tl_mlx5_mcast_coll_context_t *ctx,
     qp_init_attr.cap.max_recv_sge    = comm->params.rx_sge;
 
     for (i = 0; i < comm->mcast_group_count; i++) {
+        ucc_list_head_init(&comm->one_sided.posted_recv[i].posted_recv_bufs);
         comm->mcast.groups[i].qp = ibv_create_qp(ctx->pd, &qp_init_attr);
         if (!comm->mcast.groups[i].qp) {
             tl_error(ctx->lib, "Failed to create mcast UD qp index %d, errno %d", i, errno);
@@ -401,6 +403,8 @@ ucc_status_t ucc_tl_mlx5_mcast_setup_qps(ucc_tl_mlx5_mcast_coll_context_t *ctx,
             tl_error(ctx->lib, "failed to modify QP to RTS, errno %d", errno);
             goto error;
         }
+
+        tl_debug(ctx->lib, "modified UD QP to RTS and RTR for mcast group id %d", i);
     }
 
     /* create the address handle */
@@ -518,7 +522,6 @@ ucc_status_t ucc_tl_mlx5_mcast_modify_rc_qps(ucc_tl_mlx5_mcast_coll_context_t *c
         attr.max_dest_rd_atomic	   = 16;
         attr.min_rnr_timer         = 12;
         attr.ah_attr.is_global     = 0;
-        attr.ah_attr.dlid          = comm->mcast.rc_lid[i];
         attr.ah_attr.dlid          = comm->one_sided.info[i].port_lid;
         attr.ah_attr.sl            = DEF_SL;
         attr.ah_attr.src_path_bits = 0;
@@ -632,6 +635,10 @@ ucc_status_t ucc_tl_mlx5_clean_mcast_comm(ucc_tl_mlx5_mcast_coll_comm_t *comm)
     if (status) {
         tl_error(comm->lib, "couldn't leave mcast group");
         return status;
+    }
+
+    if (comm->one_sided.reliability_enabled) {
+        ucc_tl_mlx5_mcast_one_sided_cleanup(comm);
     }
 
     if (comm->mcast.rcq) {
