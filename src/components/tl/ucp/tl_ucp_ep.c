@@ -30,8 +30,8 @@ static inline ucc_status_t ucc_tl_ucp_connect_ep(ucc_tl_ucp_context_t *ctx,
     ep_params.field_mask = UCP_EP_PARAM_FIELD_REMOTE_ADDRESS;
     ep_params.address    = (ucp_address_t *)ucp_address;
 
-    ep_params.field_mask |= UCP_EP_PARAM_COLLECTIVES_PRIO_TRAFFIC_CLASS;
-    ep_params.traffic_class = traffic_class;
+    // ep_params.field_mask |= UCP_EP_PARAM_COLLECTIVES_PRIO_TRAFFIC_CLASS;
+    // ep_params.traffic_class = traffic_class;
 
     printf("[ucc_tl_ucp_connect_ep] Setting traffic_class = %u\n", traffic_class);
 
@@ -43,8 +43,8 @@ static inline ucc_status_t ucc_tl_ucp_connect_ep(ucc_tl_ucp_context_t *ctx,
                                     UCP_EP_PARAM_FIELD_ERR_HANDLER;
     }
 
-    printf("[ucc_tl_ucp_connect_ep] Pre-create - traffic_class = %u\n", traffic_class);
-    printf("[ucc_tl_ucp_connect_ep] Creating UCP endpoint with traffic_class = %u\n", ep_params.traffic_class);
+    // printf("[ucc_tl_ucp_connect_ep] Pre-create - traffic_class = %u\n", traffic_class);
+    // printf("[ucc_tl_ucp_connect_ep] Creating UCP endpoint with traffic_class = %u\n", ep_params.traffic_class);
     status = ucp_ep_create(worker, &ep_params, ep);
 
     if (ucc_unlikely(UCS_OK != status)) {
@@ -71,7 +71,7 @@ ucc_status_t ucc_tl_ucp_connect_team_ep(ucc_tl_ucp_team_t *team,
     printf("[ucc_tl_ucp_connect_team_ep] team->bp.params.mask = 0x%lx\n", team->super.super.params.params.mask);
     printf("[ucc_tl_ucp_connect_team_ep] The traffic_class in the team is = %u\n", team->traffic_class);
     printf("[ucc_tl_ucp_connect_team_ep] team address: %p, traffic_class: %u\n", team, team->traffic_class);
-    return ucc_tl_ucp_connect_ep(ctx, use_service_worker, ep, addr, team->traffic_class);
+    return ucc_tl_ucp_connect_ep(ctx, use_service_worker, ep, addr, team->super.super.params.params.ep_traffic_class);
 }
 
 /* Finds next non-NULL ep in the storage and returns that handle

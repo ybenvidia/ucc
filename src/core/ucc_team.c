@@ -312,6 +312,7 @@ static ucc_status_t ucc_team_create_cls(ucc_context_t *context,
         printf("[ucc_team_create_cls] The bp.params.ep_traffic_class is = %u\n", team->bp.params.ep_traffic_class);
         status   = cl_iface->team.create_post(&context->cl_ctx[i]->super,
                                               &team->bp, &b_team);
+        printf("[ucc_team_create_cls] The bp.params.ep_traffic_class is after create_post = %u\n", team->bp.params.ep_traffic_class);
         if (status != UCC_OK) {
             ucc_debug("failed to create CL %s team", cl_iface->super.name);
             continue;
@@ -335,6 +336,7 @@ static ucc_status_t ucc_team_create_cls(ucc_context_t *context,
         ucc_error("no CL teams were created");
         return UCC_ERR_NO_MESSAGE;
     }
+    printf("[ucc_team_create_cls] The bp.params.ep_traffic_class is after create_cls = %u\n", team->bp.params.ep_traffic_class);
     return UCC_OK;
 }
 
