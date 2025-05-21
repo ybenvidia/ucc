@@ -1483,6 +1483,9 @@ typedef struct ucc_team_params {
       */
     uint64_t                id;
 
+    /** @ref ucc_team_params.ep_traffic_class
+      * The traffic class to be used for the team's endpoints.
+      */
     uint8_t                 ep_traffic_class;
 } ucc_team_params_t;
 

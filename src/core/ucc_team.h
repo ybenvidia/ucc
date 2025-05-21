@@ -49,6 +49,7 @@ typedef struct ucc_team {
     ucc_topo_t             *topo;
     ucc_score_map_t        *score_map; /*< score map of CLs */
     uint32_t                seq_num;
+    uint8_t                 ep_traffic_class;
 } ucc_team_t;
 
 /* If the bit is set then team_id is provided by the user */
