@@ -30,9 +30,9 @@ static inline ucc_status_t ucc_tl_ucp_connect_ep(ucc_tl_ucp_context_t *ctx,
     ep_params.field_mask = UCP_EP_PARAM_FIELD_REMOTE_ADDRESS;
     ep_params.address    = (ucp_address_t *)ucp_address;
     ep_params.field_mask |= UCP_TEAM_PARAM_FIELD_EP_TRAFFIC_CLASS;
-    ep_params.ep_traffic_class = ctx->ep_traffic_class;
+    ep_params.ep_traffic_class = ep_traffic_class;
 
-    printf("[ucc_tl_ucp_connect_ep] ep_traffic_class = %u\n", ctx->ep_traffic_class);
+    printf("[ucc_tl_ucp_connect_ep] ep_traffic_class = %u\n", ep_traffic_class);
     printf("[ucc_tl_ucp_connect_ep] ep_params.ep_traffic_class = %u\n", ep_params.ep_traffic_class);
 
     if (!UCC_TL_CTX_HAS_OOB(ctx)) {
