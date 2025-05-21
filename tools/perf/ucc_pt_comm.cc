@@ -162,11 +162,9 @@ ucc_status_t ucc_pt_comm::init()
     team_params.mask     = UCC_TEAM_PARAM_FIELD_EP |
                            UCC_TEAM_PARAM_FIELD_EP_RANGE |
                            UCC_TEAM_PARAM_FIELD_OOB;
-                           UCC_TEAM_PARAM_FIELD_EP_TRAFFIC_CLASS;
     team_params.oob      = bootstrap->get_team_oob();
     team_params.ep       = bootstrap->get_rank();
     team_params.ep_range = UCC_COLLECTIVE_EP_RANGE_CONTIG;
-    team_params.ep_traffic_class = 96;
     UCCCHECK_GOTO(ucc_team_create_post(&context, 1, &team_params, &team),
                   free_ctx, st);
     do {
