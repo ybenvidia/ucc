@@ -75,8 +75,8 @@ ucc_status_t ucc_tl_ucp_connect_team_ep(ucc_tl_ucp_team_t *team,
     printf("[ucc_tl_ucp_connect_team_ep] team=%p, core_rank=%d\n", 
            team, core_rank);
     printf("[ucc_tl_ucp_connect_team_ep] team->ep_traffic_class = %u\n", team->ep_traffic_class);
-    printf("[ucc_tl_ucp_connect_team_ep] team->super.super.params.mask = 0x%lx\n", 
-           team->super.super.params.mask);
+    printf("[ucc_tl_ucp_connect_team_ep] team->super.super.params.params.mask = 0x%lx\n", 
+           team->super.super.params.params.mask);
     printf("[ucc_tl_ucp_connect_team_ep] is_service_team = %d\n", 
            UCC_TL_IS_SERVICE_TEAM(team));
     printf("[ucc_tl_ucp_connect_team_ep] use_service_worker = %d\n", 
