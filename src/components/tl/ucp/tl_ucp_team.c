@@ -52,6 +52,8 @@ UCC_CLASS_INIT_FUNC(ucc_tl_ucp_team_t, ucc_base_context_t *tl_context,
 
     printf("[UCC_CLASS_INIT_FUNC] Base params check - traffic_class: %u\n",
            params->ep_traffic_class);
+    printf("[UCC_CLASS_INIT_FUNC] Base params check - mask: 0x%lx\n",
+           params->params.mask);
 
     UCC_CLASS_CALL_SUPER_INIT(ucc_tl_team_t, &ctx->super, params);
     /* TODO: init based on ctx settings and on params: need to check
@@ -64,7 +66,15 @@ UCC_CLASS_INIT_FUNC(ucc_tl_ucp_team_t, ucc_base_context_t *tl_context,
     self->topo            = NULL;
     self->opt_radix       = UCC_UUNITS_AUTO_RADIX;
     self->opt_radix_host  = UCC_UUNITS_AUTO_RADIX;
-    self->ep_traffic_class   = params->ep_traffic_class;
+    
+    if (params->params.mask & UCC_TEAM_PARAM_FIELD_EP_TRAFFIC_CLASS) {
+        printf("[UCC_CLASS_INIT_FUNC] Inside if statement params->ep_traffic_class = %u\n", params->ep_traffic_class);
+        printf("[UCC_CLASS_INIT_FUNC] Inside if statement params->params.ep_traffic_class = %u\n", params->params.ep_traffic_class);
+        self->ep_traffic_class = params->ep_traffic_class;
+    } else {
+        printf("[UCC_CLASS_INIT_FUNC] Inside else statement\n");
+        self->ep_traffic_class = UCP_EP_NO_TCLASS;
+    }
 
     printf("[UCC_CLASS_INIT_FUNC] Traffic class after assignment: %u\n", self->ep_traffic_class);
     printf("[UCC_CLASS_INIT_FUNC] team address: %p, traffic_class: %u\n", self, self->ep_traffic_class);

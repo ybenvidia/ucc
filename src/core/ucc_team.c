@@ -87,11 +87,15 @@ static ucc_status_t ucc_team_create_post_single(ucc_context_t *context,
     team->state                   = (team->size > 1) ? UCC_TEAM_ADDR_EXCHANGE
                                                      : UCC_TEAM_CL_CREATE;
     team->last_team_create_posted = -1;
-    team->bp.ep_traffic_class = team->ep_traffic_class;
+    team->bp.ep_traffic_class     = team->ep_traffic_class;
+
+    // printf("[ucc_team_create_post_single]: team->ep_traffic_class = %u\n", team->ep_traffic_class);
+    // printf("[ucc_team_create_post_single]: team->bp.ep_traffic_class = %u\n", team->bp.ep_traffic_class);
+    // printf("[ucc_team_create_post_single]: team->bp.params.ep_traffic_class = %u\n", team->bp.params.ep_traffic_class);
 
     printf("[ucc_team_create_post_single]: final ep_traffic_class = %u\n",
         team->bp.ep_traffic_class);
-
+        
     return UCC_OK;
 }
 
@@ -103,6 +107,9 @@ ucc_status_t ucc_team_create_post(ucc_context_h *contexts, uint32_t num_contexts
     uint64_t     team_rank = UINT64_MAX;
     ucc_team_t  *team;
     ucc_status_t status;
+
+    printf("[ucc_team_create_post] Initial params->ep_traffic_class = %u\n", params->ep_traffic_class);
+    printf("[ucc_team_create_post] Initial params->mask = 0x%lx\n", params->mask);
 
     if (num_contexts < 1) {
         return UCC_ERR_INVALID_PARAM;
@@ -194,7 +201,7 @@ ucc_status_t ucc_team_create_post(ucc_context_h *contexts, uint32_t num_contexts
     team->seq_num      = 0;
     team->contexts     = ucc_malloc(sizeof(ucc_context_t *) * num_contexts,
                                     "ucc_team_ctx");
-    
+
     printf("[ucc_team_create_post]: mask = 0x%lx, ep_traffic_class = %u\n",
         params->mask, params->ep_traffic_class);
 

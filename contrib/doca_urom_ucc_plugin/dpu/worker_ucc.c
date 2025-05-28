@@ -2170,7 +2170,6 @@ urom_worker_ucc_pass_dc_create(struct urom_worker_ucc *ucc_worker,
         ep_params.err_mode        = UCP_ERR_HANDLING_MODE_PEER;
         ep_params.address         = ucc_cmd->pass_dc_create_cmd.ucp_addr;
 
-        printf("[worker_ucc - ucp_ep_create]");
         ucs_status = ucp_ep_create(ucc_worker->ucp_data.ucp_worker,
                                     &ep_params, &new_ep);
         if (ucs_status != UCS_OK) {
