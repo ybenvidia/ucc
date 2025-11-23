@@ -114,21 +114,22 @@ UccTestMpi::UccTestMpi(int argc, char *argv[], ucc_thread_mode_t _tm,
         onesided_ctx = nullptr;
     }
     set_msgsizes(8, ((1ULL) << 21), 8);
-    dtypes     = {UCC_DT_INT16,           UCC_DT_INT32,
-              UCC_DT_INT64,           UCC_DT_UINT16,
-              UCC_DT_UINT32,          UCC_DT_UINT64,
-              UCC_DT_FLOAT32,         UCC_DT_FLOAT64,
-              UCC_DT_FLOAT128,        UCC_DT_FLOAT32_COMPLEX,
-              UCC_DT_FLOAT64_COMPLEX, UCC_DT_FLOAT128_COMPLEX};
-    ops        = {UCC_OP_SUM, UCC_OP_MAX};
-    colls      = {UCC_COLL_TYPE_BARRIER, UCC_COLL_TYPE_ALLREDUCE};
-    mtypes     = {UCC_MEMORY_TYPE_HOST};
-    inplace    = false;
-    persistent = false;
-    root_type  = ROOT_RANDOM;
-    root_value = 10;
-    iterations = 1;
-    triggered  = false;
+    dtypes             = {UCC_DT_INT16,           UCC_DT_INT32,
+                          UCC_DT_INT64,           UCC_DT_UINT16,
+                          UCC_DT_UINT32,          UCC_DT_UINT64,
+                          UCC_DT_FLOAT32,         UCC_DT_FLOAT64,
+                          UCC_DT_FLOAT128,        UCC_DT_FLOAT32_COMPLEX,
+                          UCC_DT_FLOAT64_COMPLEX, UCC_DT_FLOAT128_COMPLEX};
+    ops                = {UCC_OP_SUM, UCC_OP_MAX};
+    colls              = {UCC_COLL_TYPE_BARRIER, UCC_COLL_TYPE_ALLREDUCE};
+    mtypes             = {UCC_MEMORY_TYPE_HOST};
+    inplace            = false;
+    persistent         = false;
+    root_type          = ROOT_RANDOM;
+    root_value         = 10;
+    iterations         = 1;
+    triggered          = false;
+    local_registration = false;
 }
 
 void UccTestMpi::set_iter(int iter)
@@ -466,8 +467,13 @@ void set_gpu_device(test_set_gpu_device_t set_device)
     }
 #if defined(HAVE_CUDA)
     CUDA_CHECK(cudaSetDevice(device_id));
+    // Force CUDA context creation for the device
+    // Without this, cuCtxGetCurrent() in TL/CUDA will return NULL
+    CUDA_CHECK(cudaFree(0));
 #elif defined(HAVE_HIP)
     HIP_CHECK(hipSetDevice(device_id));
+    // Force HIP context creation for the device
+    HIP_CHECK(hipFree(0));
 #endif
 
 }
@@ -494,6 +500,9 @@ std::vector<ucc_test_mpi_result_t> UccTestMpi::exec_tests(
                     } else {
                        std::cout << tc->str() << std::endl;
                     }
+                }
+                if (tc->args.flags & UCC_COLL_ARGS_FLAG_MEM_MAPPED_BUFFERS) {
+                    MPI_Barrier(MPI_COMM_WORLD);
                 }
                 tc->run(triggered);
             } else {
@@ -539,9 +548,10 @@ void UccTestMpi::run_all_at_team(ucc_test_team_t &team,
 {
     TestCaseParams params;
 
-    params.max_size   = test_max_size;
-    params.inplace    = inplace;
-    params.persistent = persistent;
+    params.max_size           = test_max_size;
+    params.inplace            = inplace;
+    params.persistent         = persistent;
+    params.local_registration = local_registration;
 
     for (auto i = 0; i < iterations; i++) {
         for (auto &c : colls) {

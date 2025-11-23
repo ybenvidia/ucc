@@ -11,11 +11,17 @@
 #include "components/tl/ucc_tl.h"
 #include "components/tl/ucc_tl_log.h"
 #include "components/mc/ucc_mc.h"
+#include "components/cl/ucc_cl_type.h" // for UCC_CL_HIER
 #include "utils/ucc_mpool.h"
 #include "utils/ucc_datastruct.h"
 #include "tl_cuda_ep_hash.h"
 #include "tl_cuda_topo.h"
 #include "tl_cuda_team_topo.h"
+#ifdef HAVE_NVLS
+#include "tl_cuda_nvls.h"
+#endif
+
+#include <cuda.h>
 #include <cuda_runtime.h>
 
 #ifndef UCC_TL_CUDA_DEFAULT_SCORE
@@ -25,11 +31,17 @@
 #define UCC_TL_CUDA_MAX_PEERS 8
 #define UCC_TL_CUDA_MAX_RING_CHUNKS 8
 
+#ifdef HAVE_NVLS
+#define UCC_TL_CUDA_MAX_NVLS_PEERS 144
+#define UCC_TL_CUDA_MAX_NVLS_SM_COUNT 32
+#define UCC_TL_CUDA_MAX_NVLS_THREADS 1024
+
+#endif /* HAVE_NVLS */
 #define UCC_TL_CUDA_SUPPORTED_COLLS                                            \
     (UCC_COLL_TYPE_ALLTOALL | UCC_COLL_TYPE_ALLTOALLV |                        \
      UCC_COLL_TYPE_ALLGATHER | UCC_COLL_TYPE_ALLGATHERV |                      \
-     UCC_COLL_TYPE_BCAST |                                                     \
-     UCC_COLL_TYPE_REDUCE_SCATTER | UCC_COLL_TYPE_REDUCE_SCATTERV)
+     UCC_COLL_TYPE_BCAST | UCC_COLL_TYPE_REDUCE_SCATTER |                      \
+     UCC_COLL_TYPE_REDUCE_SCATTERV)
 
 #define UCC_TL_CUDA_TEAM_LIB(_team)                                            \
     (ucc_derived_of((_team)->super.super.context->lib, ucc_tl_cuda_lib_t))
@@ -75,10 +87,17 @@ extern ucc_tl_cuda_iface_t ucc_tl_cuda;
 typedef struct ucc_tl_cuda_lib_config {
     ucc_tl_lib_config_t super;
     uint32_t            max_concurrent; // Maximum number of tasks that can be progressed simultaneously.
-    size_t              scratch_size;
+    size_t              scratch_size;   // Size of the scratch buffer for each task
     unsigned long       allgather_ring_max_rings;
     uint32_t            allgather_ring_num_chunks;
     unsigned long       reduce_scatter_ring_max_rings;
+    int                 topo_cache_enable;
+#ifdef HAVE_NVLS
+    size_t              nvls_symmetric_size; // Size of the symmetric memory for NVLS, for each task
+    uint32_t            nvls_sm_count;       // Number of blocks (SMs) to use for NVLS algorithms
+    uint32_t            nvls_threads;        // Number of threads per block to use for NVLS algorithms
+#endif
+    int                 alltoall_use_copy_engine;
 } ucc_tl_cuda_lib_config_t;
 
 typedef struct ucc_tl_cuda_context_config {
@@ -88,6 +107,7 @@ typedef struct ucc_tl_cuda_context_config {
 typedef struct ucc_tl_cuda_lib {
     ucc_tl_lib_t             super;
     ucc_tl_cuda_lib_config_t cfg;
+    ucc_tl_cuda_topo_t      *topo;  /* Shared topology information */
 } ucc_tl_cuda_lib_t;
 UCC_CLASS_DECLARE(ucc_tl_cuda_lib_t, const ucc_base_lib_params_t *,
                   const ucc_base_config_t *);
@@ -167,10 +187,14 @@ typedef struct ucc_tl_cuda_team {
     ucc_tl_cuda_sync_state_t  *sync_state;         // Tracks the task currently using the sync segment of shared memory, if free - 0
     ucc_tl_cuda_shm_barrier_t *bar;                // Pointer to the first barrier in an array of size [0; 2 * max_concurrent]. First max_concurrent barriers are for normal mode, the second one for active set mode
     ucc_tl_cuda_scratch_t      scratch;
-    cudaStream_t               stream;
+    cudaStream_t               stream;             // CUDA stream for the team
     ucc_tl_cuda_rank_id_t     *ids;
     ucc_team_oob_coll_t        oob;
     void                      *oob_req;
+#ifdef HAVE_NVLS
+    ucc_tl_cuda_nvls_t       nvls;
+    ucc_tl_cuda_nvls_state_t state; // State of the nvls initialization
+#endif
 } ucc_tl_cuda_team_t;
 
 UCC_CLASS_DECLARE(ucc_tl_cuda_team_t, ucc_base_context_t *,
@@ -200,12 +224,18 @@ struct ucc_tl_cuda_task {
             ucc_count_t           *rcnts;
             ucc_aint_t            *sdispl;
             ucc_aint_t            *rdispl;
+            void                  *evt_completion; // CUDA event for completion of the task
+            int                    use_copy_engine;
             ucc_ee_executor_task_t
                  *exec_task[UCC_TL_CUDA_MAX_PEERS * UCC_TL_CUDA_MAX_PEERS];
             size_t (*get_size)(const ucc_tl_cuda_task_t *task, size_t *bytes,
                                ucc_rank_t block);
             size_t (*get_offset)(const ucc_tl_cuda_task_t *task,
                                  size_t *displ_bytes, ucc_rank_t block);
+            ucc_status_t (*copy_post)(void *dst, const void *src, size_t len,
+                                      ucc_ee_executor_t       *executor,
+                                      ucc_ee_executor_task_t **task,
+                                      cudaStream_t             stream);
         } alltoallv_ce;
         struct {
             int                     stage;
@@ -269,6 +299,34 @@ struct ucc_tl_cuda_task {
             size_t (*get_offset)(const ucc_tl_cuda_task_t *task,
                                  ucc_rank_t                block);
         } reduce_scatterv_linear;
+#ifdef HAVE_NVLS
+        struct {
+            int                     stage;
+            int                     num_frags;
+            ucc_datatype_t          dt;
+            void *                  sbuf;
+            void *                  rbuf;
+            size_t                  src_size_bytes;
+            size_t                  dst_size_bytes;
+            size_t (*get_count)(const ucc_tl_cuda_task_t *task,
+                                ucc_rank_t                block);
+            size_t (*get_offset)(const ucc_tl_cuda_task_t *task,
+                                 ucc_rank_t                block);
+            cudaEvent_t             evt_copy;
+            cudaEvent_t             evt_completion;
+        } reduce_scatterv_nvls;
+        struct {
+            int            stage;
+            ucc_datatype_t dt;
+            void          *sbuf;
+            void          *rbuf;
+            size_t         buf_size_bytes;
+            CUdeviceptr    mc_va; // Memory handle for MC symmetric memory
+            CUdeviceptr    uc_va; // Memory handle for UC symmetric memory
+            void          *evt_completion;
+            size_t         coll_id; // Coll id for the NVLS task in flight slot
+        } allreduce_nvls;
+#endif
     };
 };
 

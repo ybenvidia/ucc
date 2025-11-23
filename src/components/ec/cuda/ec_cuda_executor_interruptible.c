@@ -17,6 +17,9 @@ ucc_status_t ucc_cuda_executor_interruptible_get_stream(cudaStream_t *stream)
     uint32_t                 id;
 
     ucc_assert(num_streams > 0);
+    if (ucc_unlikely(num_streams <= 0)) {
+        return UCC_ERR_INVALID_PARAM;
+    }
     st = ucc_ec_cuda_get_resources(&resources);
     if (ucc_unlikely(st != UCC_OK)) {
         return st;
@@ -150,8 +153,11 @@ ucc_cuda_executor_interruptible_task_post(ucc_ee_executor_t *executor,
     case UCC_EE_EXECUTOR_TASK_REDUCE:
     case UCC_EE_EXECUTOR_TASK_REDUCE_STRIDED:
     case UCC_EE_EXECUTOR_TASK_REDUCE_MULTI_DST:
-        status = ucc_ec_cuda_reduce((ucc_ee_executor_task_args_t *)task_args,
-                                    stream);
+        status = ucc_ec_cuda_reduce(
+            (ucc_ee_executor_task_args_t *)task_args,
+            resources->num_threads_reduce,
+            resources->num_blocks_reduce,
+            stream);
         if (ucc_unlikely(status != UCC_OK)) {
             ec_error(&ucc_ec_cuda.super, "failed to start reduce op");
             goto free_task;

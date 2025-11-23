@@ -21,11 +21,11 @@ export UCC_USERNAME=$UCC_USERNAME
 topdir=$(git rev-parse --show-toplevel)
 cd "$topdir" || exit 1
 module load hpcx-gcc
-module load dev/cuda12.1.1
-module load dev/nccl_2.18.3-1_cuda12.1.1_"$(uname -i)"
+module load dev/cuda12.9.0
+module load dev/nccl_2.26.5-1_cuda12.9.0
 module load tools/cov-2021.12
 ./autogen.sh
-./configure --with-nccl --with-tls=cuda,nccl,self,sharp,shm,ucp,mlx5 --with-ucx="${HPCX_UCX_DIR}" --with-sharp="${HPCX_SHARP_DIR}" --with-nvcc-gencode="-gencode=arch=compute_70,code=sm_70"
+./configure --with-nccl --with-tls=cuda,nccl,self,sharp,shm,ucp,mlx5 --with-ucx="${HPCX_UCX_DIR}" --with-sharp="${HPCX_SHARP_DIR}" --with-nvcc-gencode="-gencode arch=compute_86,code=sm_86"
 make_opt="-j$(($(nproc) / 2 + 1))"
 COV_BUILD_DIR=$(dirname "$0")/cov-build
 mkdir -p "$COV_BUILD_DIR"
@@ -34,6 +34,7 @@ COV_ANALYSE_OPTIONS+=" --enable-fnptr"
 COV_ANALYSE_OPTIONS+=" --fnptr-models"
 COV_ANALYSE_OPTIONS+=" --checker-option INFINITE_LOOP:report_bound_type_mismatch:true"
 COV_ANALYSE_OPTIONS+=" --checker-option RESOURCE_LEAK:allow_unimpl:true"
+COV_ANALYSE_OPTIONS+=" --aggressiveness-level medium"
 
 function show_usage() {
     echo ""

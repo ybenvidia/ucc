@@ -27,7 +27,7 @@ export HOSTS
 HEAD_NODE=$(head -1 "$HOSTFILE")
 export HEAD_NODE
 
-DOCKER_CONTAINER_NAME="torch_ucc"
+DOCKER_CONTAINER_NAME="torch_ucc_${BUILD_ID}"
 DOCKER_IMAGE_NAME="${UCC_DOCKER_IMAGE_NAME}:${BUILD_ID}"
 
 DOCKER_RUN_ARGS="\
@@ -66,10 +66,6 @@ HOST_LIST="$(cat "$HOSTFILE" | xargs hostlist)"
 
 pdsh -w "${HOST_LIST}" -R ssh hostname
 
-echo "INFO: clean up docker artefacts on ..."
-pdsh -w "${HOST_LIST}" -R ssh docker system prune --all --volumes --force
-echo "INFO: clean up docker artefacts on ... DONE"
-
 pdsh -w "${HOST_LIST}" -R ssh docker pull "${DOCKER_IMAGE_NAME}"
 
 # shellcheck disable=SC2013
@@ -82,7 +78,7 @@ for HOST in $(cat "$HOSTFILE"); do
         sudo /usr/sbin/sshd -D -p ${DOCKER_SSH_PORT}"
     echo "INFO: start docker container on $HOST ... DONE"
 
-    sleep 5
+    sleep 15
 
     echo "INFO: verify docker container on $HOST ..."
     ssh -p "${DOCKER_SSH_PORT}" "$HOST" hostname
